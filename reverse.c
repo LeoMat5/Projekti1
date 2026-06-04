@@ -1,5 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////////
 // HUOM. Kommentointi on suomeksi, kun taas ohjelman toiminnallisuus on englanniksi.//
+// Lisäilin myös omia ominaisuuksia tehtävänannon lisäksi, kuten käyttäjän opastus. //
 //////////////////////////////////////////////////////////////////////////////////////
 
 // Määrittelyt //
@@ -18,23 +19,18 @@ typedef struct nodeList {
 
 // Apuohjelmat //
 
-// Muistin vapautus apuohjelma.
-void freeMemory() {
-    return;
-}
-
 // Sisällön kääntöön tarkoitettu apuohjelma, parametreina ohjelman ajossa annetut argumentit.
 void reverse(char *pRead_InputFileName, char *pWrite_OutputFileName) {
 
     // Alustus //
-    LinkedListNode *pNew = NULL, *ptr = NULL; // C-kielen kurssilla opetettiin alustamaan näin. 
+    LinkedListNode *pNew = NULL, *ptr = NULL, *pListStart = NULL; // C-kielen kurssilla opetettiin alustamaan näin. 
     FILE *fRead = NULL; // C-kielen kurssilla opetettiin tekemään näin, vaikka se on vähän hassua kirjoittaa kaksi alustusta
     fRead = stdin;      // Syy on se, että jos sitä ei ensin alusteta NULLiksi, sinne saattaa jäädä jotakin väärin.
     FILE *fWrite = NULL;
     fWrite = stdout;
     char *pRow = NULL;
     size_t len = 0;
-    size_t amountOfReadSymbols = 0;
+    ssize_t amountOfReadSymbols;
 
     // Tarkistetaan, onko input tiedoston nimeä annettu
     if (pRead_InputFileName != NULL) { // Jos on annettu, sitä käytetään, muuten stdin.
@@ -63,8 +59,8 @@ void reverse(char *pRead_InputFileName, char *pWrite_OutputFileName) {
             exit(1);
         }
         
-        pNew -> sRow = pRow; // Tallennetaan Nodeen merkkijonon osoitin. Merkkijonothan ovat muistissa symboli kerrallaan vierekkäin, joten tarvitsee vain ensimmäisen osoitteen.
-        pNew -> pNext = ptr; // Osoittimen päivitys.
+        pNew->sRow = pRow; // Tallennetaan Nodeen merkkijonon osoitin. Merkkijonothan ovat muistissa symboli kerrallaan vierekkäin, joten tarvitsee vain ensimmäisen osoitteen.
+        pNew->pNext = ptr; // Osoittimen päivitys.
         ptr = pNew;          // Tämä on LIFO (Last In First Out), joka kääntää järjestyksen. Olisi voinut myös käyttää pPrevious pointteria.
         
         // Alustus seuraavalle kierrokselle
@@ -78,7 +74,11 @@ void reverse(char *pRead_InputFileName, char *pWrite_OutputFileName) {
     fclose(fRead);
     // printf("Read file closed\n");
 
+    // Otetaan listan alkuosoite talteen.
+    pListStart = ptr;
+
     // Linkitetystä listasta lukeminen joko näytölle tai tiedostoon.
+
     if (pWrite_OutputFileName != NULL) { // Tarkistetaan onko toista argumenttia annettu (read tiedoston nimi)
          if ((fWrite = fopen(pWrite_OutputFileName, "w")) == NULL) {
             fprintf(stderr, "error: cannot write to file '%s'\n", pWrite_OutputFileName); // Ei ollut ohjeessa, mutta on tärkeää tehdä kuitenkin.
@@ -87,21 +87,29 @@ void reverse(char *pRead_InputFileName, char *pWrite_OutputFileName) {
 
         // Kirjoitus tiedostoon.
         while (ptr != NULL) {
-        fprintf(fWrite, "%s", ptr->sRow);
-        ptr = ptr->pNext;
-    }
+            fprintf(fWrite, "%s", ptr->sRow);
+            ptr = ptr->pNext;
+        }
 
-    // Suljetaan kirjoitettava tiedosto.
-    fclose(fWrite);
+        // Suljetaan kirjoitettava tiedosto.
+        fclose(fWrite);
 
     } else { // Kirjoitettavaa tiedostoa ei annettu, tulostetaan näytölle fprintf käyttäen.
-        fprintf(stdout, "%s", "\nIn reverse the given rows are:\n\n");
+        fprintf(stdout, "%s", "\nNo write file name given, writing to the screen.\nIn reverse the given rows are:\n\n");
         while (ptr != NULL) {
             fprintf(stdout, "%s", ptr->sRow);
             ptr = ptr->pNext;
         }
     }
 
+    // Linkitetyn listan muistin vapautus.
+    LinkedListNode *pNext = NULL; // Avustin osoitin.  
+    while (pListStart != NULL) {
+        pNext = pListStart->pNext; // Structista otetaan ptr->pNext säilöön, ettei muistin vapautuksessa tarvittavat asiat katoa.
+        free(pListStart->sRow);    // Vapautetaan muisti pointterin osoittamasta merkkijonosta
+        free(pListStart);   // Ja sitten myös pointterilta.
+        pListStart = pNext; // Siirretään ptr osoittamaan aiemmin tallennettuun pNextiin, eli seuraavan noden osoitteeseen siirtyminen.
+    }
 
     return;
 }
