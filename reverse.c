@@ -28,9 +28,9 @@ void reverse(char *pRead_InputFileName, char *pWrite_OutputFileName) {
     fRead = stdin;      // Syy on se, että jos sitä ei ensin alusteta NULLiksi, sinne saattaa jäädä jotakin väärin.
     FILE *fWrite = NULL;
     fWrite = stdout;
-    char *pRow = NULL;
-    size_t len = 0;
-    ssize_t amountOfReadSymbols;
+    char *pRow = NULL;  // Osoitin riveihin
+    size_t len = 0;     // getline() vaatima puskurin koko -muuttuja
+    ssize_t amountOfReadSymbols; // Luettujen symbolien määrä, -1 tarkoittaa että EOF saavutettu lukematta mitään tai voi tarkoittaa myös virhettä.
 
     // Tarkistetaan, onko input tiedoston nimeä annettu
     if (pRead_InputFileName != NULL) { // Jos on annettu, sitä käytetään, muuten stdin.
