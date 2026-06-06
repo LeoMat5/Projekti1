@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
             
             if (stat(argv[1], &inputFile) == 0 && stat(argv[2], &outputFile) == 0) { // https://linux-tips.com/t/hard-link-files/125
                 if (inputFile.st_ino == outputFile.st_ino) { // Samat tiedostot, ei jatkoon. Tässä on myös käytetty. Ino on inode numero.
-                    fprintf(stderr, "error: input and output file must differ\n");
+                    printf("error: input and output file must differ\n");
                     return(1);
                 }
             }
