@@ -85,7 +85,7 @@ void reverse(char *pRead_InputFileName, char *pWrite_OutputFileName) {
 
     if (pWrite_OutputFileName != NULL) { // Tarkistetaan onko toista argumenttia annettu (read tiedoston nimi)
          if ((fWrite = fopen(pWrite_OutputFileName, "w")) == NULL) {
-            fprintf(stderr, "reverse: cannot open file '%s'\n", pWrite_OutputFileName); // Huom! Tehtävänannossa on väärin "error: ", testissä on "reverse: "
+            fprintf(stderr, "error: cannot open file '%s'\n", pWrite_OutputFileName); // Huom! Tehtävänannossa on väärin "error: ", testissä on "reverse: "
             exit(1);
         }
 
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
             
             if (stat(argv[1], &inputFile) == 0 && stat(argv[2], &outputFile) == 0) { // https://linux-tips.com/t/hard-link-files/125
                 if (inputFile.st_ino == outputFile.st_ino) { // Samat tiedostot, ei jatkoon. Tässä on myös käytetty. Ino on inode numero.
-                    fprintf(stderr, "reverse: input and output file must differ\n");
+                    fprintf(stderr, "error: input and output file must differ\n");
                     return(1);
                 }
             }
