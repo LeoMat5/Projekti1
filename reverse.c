@@ -81,7 +81,7 @@ void reverse(char *pRead_InputFileName, char *pWrite_OutputFileName) {
 
     if (pWrite_OutputFileName != NULL) { // Tarkistetaan onko toista argumenttia annettu (read tiedoston nimi)
          if ((fWrite = fopen(pWrite_OutputFileName, "w")) == NULL) {
-            fprintf(stderr, "error: cannot open file '%s'\n", pWrite_OutputFileName);
+            fprintf(stderr, "reverse: cannot open file '%s'\n", pWrite_OutputFileName); // Huom! Tehtävänannossa on väärin "error: ", testissä on "reverse: "
             exit(1);
         }
 
