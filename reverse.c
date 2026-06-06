@@ -3,6 +3,9 @@
 // Lisäilin myös omia ominaisuuksia tehtävänannon lisäksi, kuten käyttäjän opastus. //
 //////////////////////////////////////////////////////////////////////////////////////
 
+// https://linux-tips.com/t/hard-link-files/125
+// https://www.baeldung.com/linux/file-hard-soft-link-test
+
 // Määrittelyt //
 #define _POSIX_C_SOURCE 200809L // Kopioitu man getline -sivulta
 
@@ -10,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 // Struct //
 typedef struct nodeList {
@@ -41,12 +45,12 @@ void reverse(char *pRead_InputFileName, char *pWrite_OutputFileName) {
 
         // printf("Read file opened\n");
         
-    } else { // Ohjeistus jos ensimmäistä argumenttia (input tiedosto) ei annettu.
-        printf("\n");
-        printf("INSTRUCTIONS:\n");
-        printf("No input file given, write each text row one by one, pressing Enter after each.\n");
-        printf("When you want to continue, press ctrl + D.\n\n");
-    }
+    } // else {  Ohjeistus jos ensimmäistä argumenttia (input tiedosto) ei annettu. // TESTIEN TAKIA KOMMENTOITU POIS
+        // printf("\n");
+        // printf("INSTRUCTIONS:\n");
+        // printf("No input file given, write each text row one by one, pressing Enter after each.\n");
+        // printf("When you want to continue, press ctrl + D.\n\n");
+    //}
 
     // Luetaan listaan tiedot joko stdin tai tiestostosta (meille opetettiin vain fgets, piti selvittää tämä getline() erikseen)
     // https://c-for-dummies.com/blog/?p=1112
@@ -95,7 +99,7 @@ void reverse(char *pRead_InputFileName, char *pWrite_OutputFileName) {
         fclose(fWrite);
 
     } else { // Kirjoitettavaa tiedostoa ei annettu, tulostetaan näytölle fprintf käyttäen.
-        fprintf(stdout, "%s", "\nNo write file name given, writing to the screen.\nIn reverse the given rows are:\n\n");
+        // fprintf(stdout, "%s", "\nNo write file name given, writing to the screen.\nIn reverse the given rows are:\n\n"); // TESTIEN TAKIA KOMMENTOITU POIS.
         while (ptr != NULL) {
             fprintf(stdout, "%s", ptr->sRow);
             ptr = ptr->pNext;
@@ -123,23 +127,29 @@ int main(int argc, char *argv[]) {
     // Alustus //
     char *inputFileName = NULL; // Ei saanut olettaa pituuksia niin ei voi käyttää esim pituutta 256
     char *outputFileName = NULL;
+    struct stat inputFile; // https://linux-tips.com/t/hard-link-files/125
+    struct stat outputFile;
 
     // Ensimmäiseksi tarkistan ei sallitut asiat
     if (argc >= 1) {
         if (argc > 3) { // Liian monta argumenttia
             fprintf(stderr, "usage: reverse <input> <output>\n");
             return(1);
-        } else if (argc == 1) { // Käydään argumenttien määrä yksitellen läpi
-            printf("No input or output file names given, using stdin and stdout in later phase.\n");
-        } else if (argc == 2) { // Syötetiedoston nimi annettu
+        } //else if (argc == 1) { // Käydään argumenttien määrä yksitellen läpi             // Testit ei mene läpi jos laajentaa omia juttuja.
+           // printf("No input or output file names given, using stdin and stdout in later phase.\n");
+        //}
+         else if (argc == 2) { // Syötetiedoston nimi annettu
             inputFileName = argv[1];
         } else if (argc == 3) { // Tässä vaiheessa on molemmat argv[1](syötetiedosto) ja argv[2](tulostiedosto) määritelty, joten niitä voi vasta tässä verrata
-            if (strcmp(argv[1], argv[2]) == 0) { // Samat nimet, ei jatkoon
-                fprintf(stderr, "Input and output file must differ\n");
-                return(1);
-            } else { // Eri nimet, jatkoon
-                inputFileName = argv[1];
-                outputFileName = argv[2];
+            // Otetaan argumenteista nimet talteen.
+            inputFileName = argv[1];
+            outputFileName = argv[2];
+            
+            if (stat(argv[1], &inputFile) == 0 && stat(argv[2], &outputFile) == 0) { // https://linux-tips.com/t/hard-link-files/125
+                if (inputFile.st_ino == outputFile.st_ino) { // Samat tiedostot, ei jatkoon. Tässä on myös käytetty. Ino on inode numero.
+                    fprintf(stderr, "reverse: input and output file must differ\n");
+                    return(1);
+                }
             }
         }
         reverse(inputFileName, outputFileName);
@@ -150,7 +160,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Teen opetetun mukaisesti myös näitä printtejä:
-    printf("\n");
-    printf("Thank you for program use.\n");
+    // printf("\n");                                    // Ei näköjään testit mene läpi näillä.
+    // printf("Thank you for program use.\n");
     return(0); // C-kielen kurssin tyyliohjeessa sanotaan aina palauttaa jotakin ja suluissa
 }
