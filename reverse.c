@@ -35,7 +35,7 @@ void reverse(char *pRead_InputFileName, char *pWrite_OutputFileName) {
     // Tarkistetaan, onko input tiedoston nimeä annettu
     if (pRead_InputFileName != NULL) { // Jos on annettu, sitä käytetään, muuten stdin.
         if ((fRead = fopen(pRead_InputFileName, "r")) == NULL) { // Tämä on myös C-kielen kurssin tyyli avata tiedosto
-            fprintf(stderr, "error: cannot open file '%s'\n", pRead_InputFileName);
+            fprintf(stderr, "reverse: cannot open file '%s'\n", pRead_InputFileName); // Huom! Tehtävänannossa on väärin "error: ", testissä on "reverse: "
             exit(1);
         }
 
